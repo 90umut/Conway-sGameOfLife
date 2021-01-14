@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de la Vie</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <style>
+        *{
+            box-sizing: unset !important;
+        }
+        body{
+            width: 100wh;
+            height: 99vh;
+            border: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .main{
+            display: flex;
+            flex-wrap: wrap;
+            
+            min-height: 500px;
+            max-width: 500px;
+            border: 1px;
+            border-color: blueviolet;
+        }
+        .cell{
+            border: 1px solid;
+            
+            border-color: gray;
+            height: 48px;
+            width: 48px;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .life{
+            background-color: black
+        }
+        .dead{
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="m-5 flex flex-row space-x-3">
+        <button id='test' type="button" class="btn btn-info">Test</button>
+        <button id='period' type="button" class="btn btn-info">Période</button>
+        <button id='timeout' type="button" class="btn btn-danger">Timeout</button>
+        <h2 id='count'></h2>
+    </div>
+    <div id='main' class="main">
+    </div>
+</body>
+<script>
+    let periods = 0
+    let timeid = 0
+    let run = false
+
+    const positions = [
+        [-1,-1],
+        [0,-1],
+        [1,-1],
+        [1,0],
+        [1,1],
+        [0,1],
+        [-1,1],
+        [-1,0],
+    ]
+    let main = document.getElementById("main");
+    let div;
+    
+    let cells = []
+    for (let x = 0;x < 10; x++){
+        cells.push([])
+        for (let y=0; y < 10; y++){
+            cells[x].push(0)
+        }
+    }
+    console.log(cells)
+
+    let period_button = document.getElementById("period")
+    let timeout_button = document.getElementById("timeout")
+    let test_button = document.getElementById("test")
+    let count = document.getElementById("count")
+
+    period_button.addEventListener("click", periode)
+    timeout_button.addEventListener("click", timeout)
+    test_button.addEventListener("click", test)
+
+    count.innerHTML = periods
+
+    for (let x = 0;x < 10; x++){
+        for (let y=0; y < 10; y++){
+            div = document.createElement('div');
+            div.classList.add("cell")
+            div.life = false
+            div.x = x
+            div.y = y
+
+            
+            div.addEventListener("click", function (){
+                this.life = !this.life
+                timeout(undefined, true)
+                refresh()
+            })
+
+            cells[x][y] = div
+            main.append(div)
+        }
+    }
+
+    refresh()
+
+    function timeout(delay = 250,stop = false){
+        if (!run && !stop){
+            timeid = setInterval(periode,250)
+            timeout_button.innerHTML = "Arrêter"
+            run = true
+        } else {
+            clearInterval(timeid)
+            timeout_button.innerHTML = "Timeout"
+            run = false
+        }
+    }
+    
+
+    function periode(){
+        cells.forEach(x => {
+                x.forEach(cell => {
+                    deleteOrNo(cell)
+            })
+        })
+        periods++
+        count.innerHTML = periods
+        refresh()
+    }
+
+
+    function refresh(){
+        cells.forEach(x => {
+                x.forEach(cell => {
+                if (cell.life){
+                    cell.classList.remove('dead')
+                    cell.classList.add('life')
+                } else {
+                    cell.classList.remove("life")
+                    cell.classList.add("dead")
+                }
+            })
+        })
+    }
+    function getNeighbours(cell){
+        let x = cell.x
+        let y = cell.y
+
+        let neighbours = []
+        
+        positions.forEach(neigh => {
+            if (cells[x+neigh[0]] == undefined){
+                
+            }
+            else if (cells[x+neigh[0]][y+neigh[1]] == undefined) {
+
+            }
+            else {
+                if (cells[x+neigh[0]][y+neigh[1]].classList.contains("life")){
+                    neighbours.push(cells[x+neigh[0]][y+neigh[1]])
+                }
+            }
+        })
+        return neighbours.length
+    }
+
+
+
+    function deleteOrNo(cell){
+        
+        if (cell.life){
+            if (getNeighbours(cell) == 2 || getNeighbours(cell) == 3){
+                cell.life = true
+            } else {
+                cell.life = false
+            }
+        }
+        else if (!cell.life){
+            if (getNeighbours(cell) == 3){
+                cell.life = true
+            } else {
+                cell.life = false
+            }
+        }
+    }
+    
+    function test(){
+
+    }
+</script>
+</html>
